@@ -6,7 +6,6 @@ import jwt from '@fastify/jwt';
 import autoLoad from '@fastify/autoload';
 import swagger from '@fastify/swagger';
 import swaggerUi from '@fastify/swagger-ui';
-import mysql from '@fastify/mysql';
 import mongodb from '@fastify/mongodb';
 import { schema } from './utils/swagger';
 import { fileURLToPath } from 'url';
@@ -33,12 +32,6 @@ await server.register(config);
 await server.register(cors, {
   // put your options here
 });
-
-if (server.config.MYSQL_CONNECTION) {
-  await server.register(mysql, {
-    connectionString: server.config.MYSQL_CONNECTION,
-  });
-}
 
 if (server.config.MONGODB_CONNECTION) {
   await server.register(mongodb, {
