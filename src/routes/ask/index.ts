@@ -16,9 +16,9 @@ const routes: FastifyPluginAsync = async (server) => {
         tags: ['bot'],
         querystring: {
           type: 'object',
-          required: ['answer'],
+          required: ['question'],
           properties: {
-            answer: { type: 'string' },
+            question: { type: 'string' },
           },
         },
         security: [
@@ -36,12 +36,12 @@ const routes: FastifyPluginAsync = async (server) => {
       },
     },
     async (request, reply) => {
-      if (!request?.query?.answer) {
+      if (!request?.query?.question) {
         return reply.code(400).send();
       }
 
       try { 
-        const response = await server.tensor.answerTheQuestion(request.query.answer);
+        const response = await server.tensor.answerTheQuestion(request.query.question);
 
         return reply.code(200).send({
           reply: response,
