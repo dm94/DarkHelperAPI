@@ -17,13 +17,19 @@ export const schema = {
     consumes: ['application/json'],
     produces: ['application/json'],
     tags: [
-      { name: 'examples', description: 'Examples' },
+      { name: 'bot', description: 'Discord bot related end-points' },
     ],
-    securityDefinitions: {
-      apiKey: {
-        type: 'apiKey',
-        name: 'apiKey',
-        in: 'header',
+    components: {
+      securitySchemes: {
+        apiKey: {
+          type: 'apiKey',
+          name: 'apiKey',
+          in: 'header',
+        },
+        token: {
+          type: 'http',
+          scheme: 'bearer',
+        },
       },
     },
   },

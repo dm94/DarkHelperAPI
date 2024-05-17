@@ -1,0 +1,174 @@
+import { dockStart } from "@nlpjs/basic";
+import { NormalizerEs, StemmerEs, StopwordsEs } from "@nlpjs/lang-es";
+import { NormalizerEn, StemmerEn, StopwordsEn } from "@nlpjs/lang-en";
+import cld from "cld";
+import { FastifyInstance, FastifyPluginAsync } from "fastify";
+import { TrainData, Tensor } from "@customtypes/tensor";
+import fp from "fastify-plugin";
+
+const validLanguajes = [
+  "en",
+  "es",
+  "tr",
+  "pt",
+  "pl",
+  "hu",
+  "it",
+  "fr",
+  "ro",
+  "de",
+  "bg",
+  "nl",
+];
+
+const normalizerEs = new NormalizerEs();
+const normalizerEn = new NormalizerEn();
+
+const stemmerEs = new StemmerEs();
+stemmerEs.stopwords = new StopwordsEs();
+
+const stemmerEn = new StemmerEn();
+stemmerEn.stopwords = new StopwordsEn();
+
+let serverInstance: FastifyInstance;
+
+const tensor: Tensor = {
+  nlp: undefined,
+  init: async () => {
+    const dock = await dockStart({
+      settings: {
+        nlp: {
+          languages: validLanguajes,
+        },
+      },
+      use: ["Nlp", "Basic", "LangEn", "LangEs"],
+    });
+    tensor.nlp = dock.get("nlp");
+    if (!tensor.nlp) {
+      return;
+    }
+
+    tensor.nlp.addLanguage("es");
+    tensor.nlp.addLanguage("en");
+
+    await tensor.loadModel();
+  },
+  loadModel: async () => {
+    const data = await tensor.getData();
+    await tensor.addModel(data);
+  },
+  getData: async () => {
+    let data: TrainData[] = [];
+
+    try {
+      const questionsCollection = serverInstance.mongo.client.db('dark').collection('questions');
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      //@ts-ignore
+      data = await questionsCollection
+        .find({}, { projection: { _id: 0, question: 1, answer: 1, language: 1 } })
+        .toArray();
+      const extraCollection = serverInstance.mongo.client.db("dark").collection("extraquestions");
+      const extra = await extraCollection
+        .find({}, { projection: { _id: 0, question: 1, answer: 1, language: 1 } })
+        .toArray();
+
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      //@ts-ignore
+      data = data.concat(extra);
+      console.info(new Date().toLocaleTimeString(), "Data: Loaded from DB");
+    } catch (error) {
+      console.log(error);
+    }
+
+    return data;
+  },
+  addModel: async (trainingData: TrainData[]) => {
+    if (!tensor?.nlp) {
+      return;
+    }
+
+    console.info(new Date().toLocaleTimeString(), "AI Logic: Model loading");
+
+    try {
+      trainingData.forEach((data) => {
+        if (!data.question || !data.answer) {
+          return;
+        }
+  
+        if (!validLanguajes.includes(data.language)) {
+          return;
+        }
+  
+        const language = data.language ?? "es";
+        let formatted = data.answer;
+  
+        if (language === "es") {
+          const tokens = stemmerEs.tokenizeAndStem(data.question, false);
+          formatted = tokens.join(".").toLowerCase();
+        } else if (language === "en") {
+          const tokens = stemmerEn.tokenizeAndStem(data.question, false);
+          formatted = tokens.join(".").toLowerCase();
+        }
+  
+        tensor.nlp?.addDocument(language, data.question, formatted);
+        tensor.nlp?.addAnswer(language, formatted, data.answer);
+      });
+      await tensor.nlp?.train();
+      tensor.nlp?.save();
+    } catch (error) {
+      console.log(error);
+    }
+
+    console.info(new Date().toLocaleTimeString(), "AI Logic: Model loaded");
+  },
+  detectLanguage: async (text, fallBack = "en") => {
+    try {
+      const response = await cld.detect(text);
+      if (response?.languages && response?.languages.length > 0) {
+        return response.languages?.[0]?.code;
+      }
+    } catch (err) {
+      console.warn(err);
+    }
+
+    return fallBack;
+  },
+  getAnAnswer: async (message, language) => {
+    if (!tensor?.nlp) {
+      return;
+    }
+
+    if (language === "es") {
+      message = normalizerEs.normalize(message);
+    } else if (language === "en") {
+      message = normalizerEn.normalize(message);
+    }
+
+    const response = await tensor.nlp?.process(language, message);
+    if (response?.answer) {
+      return response.answer;
+    }
+  
+    return null;
+  },
+  answerTheQuestion: async (question: string) => {
+    const language = await tensor.detectLanguage(question);
+    const response = await tensor.getAnAnswer(question, language);
+
+    return response ?? "No answer";
+  }
+}
+
+const tensorPlugin: FastifyPluginAsync = async (server) => {
+  serverInstance = server;
+  await tensor.init();
+  server.decorate("tensor", tensor);
+};
+
+declare module 'fastify' {
+  export interface FastifyInstance {
+    tensor: Tensor;
+  }
+}
+
+export default fp(tensorPlugin);

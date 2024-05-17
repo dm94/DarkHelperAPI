@@ -1,5 +1,6 @@
 import fastify from 'fastify';
 import config, { NodeEnv } from './plugins/config.js';
+import tensorPlugin from "./plugins/tensor.js";
 import cors from '@fastify/cors';
 import rateLimit from '@fastify/rate-limit';
 import jwt from '@fastify/jwt';
@@ -44,6 +45,7 @@ await server.register(jwt, {
   secret: server.config.JWT_SECRET,
 });
 
+
 server.decorate('authenticate', async function (request, reply) {
   try {
     await request.jwtVerify();
@@ -51,6 +53,14 @@ server.decorate('authenticate', async function (request, reply) {
     reply.send(err);
   }
 });
+
+server.decorate('botAuth', (request, reply, done) => {
+  if (!request?.headers?.apikey || request.headers.apikey !== server.config.API_KEY) {
+    return reply.code(401).send(new Error('Invalid Api Key'));
+  }
+  done();
+});
+
 
 await server.register(rateLimit, {
   global: true,
@@ -80,6 +90,8 @@ if (server.config.NODE_ENV === NodeEnv.development) {
 await server.register(autoLoad, {
   dir: join(__dirname, 'routes'),
 });
+
+await server.register(tensorPlugin);
 
 await server.ready();
 
