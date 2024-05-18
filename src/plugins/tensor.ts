@@ -5,7 +5,7 @@ import cld from "cld";
 import { FastifyInstance, FastifyPluginAsync } from "fastify";
 import { Tensor } from "@customtypes/tensor";
 import fp from "fastify-plugin";
-import { validLanguages } from "@customtypes/shared";
+import { MongoCollections, validLanguages } from "@customtypes/shared";
 import { TrainData } from "@customtypes/traindata";
 
 const normalizerEs = new NormalizerEs();
@@ -48,21 +48,18 @@ const tensor: Tensor = {
     let data: TrainData[] = [];
 
     try {
-      const questionsCollection = serverInstance.mongo.client.db('dark').collection('questions');
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      //@ts-ignore
-      data = await questionsCollection
-        .find({}, { projection: { _id: 0, question: 1, answer: 1, language: 1 } })
-        .toArray();
-      const extraCollection = serverInstance.mongo.client.db("dark").collection("extraquestions");
-      const extra = await extraCollection
-        .find({}, { projection: { _id: 0, question: 1, answer: 1, language: 1 } })
-        .toArray();
+      await Promise.all(Object.values(MongoCollections).map(async (collection) => {
+        const questionsCollection = serverInstance.mongo.client.db('dark').collection(collection);
+        const response = await questionsCollection
+          .find({}, { projection: { _id: 0, question: 1, answer: 1, language: 1 } })
+          .toArray();
 
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      //@ts-ignore
-      data = data.concat(extra);
-      console.info(new Date().toLocaleTimeString(), "Data: Loaded from DB");
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        //@ts-ignore
+        data = data.concat(response);
+      }));
+
+      console.info(`${new Date().toLocaleTimeString()} | ${data.length} Questions/Answers loaded from DB`);
     } catch (error) {
       console.log(error);
     }
