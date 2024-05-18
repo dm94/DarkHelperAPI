@@ -18,6 +18,7 @@ export const schema = {
     produces: ['application/json'],
     tags: [
       { name: 'bot', description: 'Discord bot related end-points' },
+      { name: 'web', description: 'Web related end-points' },
     ],
     components: {
       securitySchemes: {

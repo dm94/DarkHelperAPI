@@ -1,7 +1,8 @@
 import { Type } from '@sinclair/typebox';
 import { FastifyPluginAsync } from 'fastify';
 import { Error400Default, Error503Default } from '@customtypes/errors';
-import { AddAnswerToDatabaseRequest, MongoCollections } from '@customtypes/requests/train';
+import { AddAnswerToDatabaseRequest } from '@customtypes/requests/train';
+import { MongoCollections } from '@customtypes/shared';
 
 const routes: FastifyPluginAsync = async (server) => {
   server.post<AddAnswerToDatabaseRequest>(

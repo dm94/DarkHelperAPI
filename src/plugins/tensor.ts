@@ -3,23 +3,10 @@ import { NormalizerEs, StemmerEs, StopwordsEs } from "@nlpjs/lang-es";
 import { NormalizerEn, StemmerEn, StopwordsEn } from "@nlpjs/lang-en";
 import cld from "cld";
 import { FastifyInstance, FastifyPluginAsync } from "fastify";
-import { TrainData, Tensor } from "@customtypes/tensor";
+import { Tensor } from "@customtypes/tensor";
 import fp from "fastify-plugin";
-
-const validLanguajes = [
-  "en",
-  "es",
-  "tr",
-  "pt",
-  "pl",
-  "hu",
-  "it",
-  "fr",
-  "ro",
-  "de",
-  "bg",
-  "nl",
-];
+import { validLanguages } from "@customtypes/shared";
+import { TrainData } from "@customtypes/traindata";
 
 const normalizerEs = new NormalizerEs();
 const normalizerEn = new NormalizerEn();
@@ -38,7 +25,7 @@ const tensor: Tensor = {
     const dock = await dockStart({
       settings: {
         nlp: {
-          languages: validLanguajes,
+          languages: validLanguages,
         },
       },
       use: ["Nlp", "Basic", "LangEn", "LangEs"],
@@ -95,7 +82,7 @@ const tensor: Tensor = {
           return;
         }
   
-        if (!validLanguajes.includes(data.language)) {
+        if (!validLanguages.includes(data.language)) {
           return;
         }
   

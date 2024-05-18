@@ -1,11 +1,13 @@
+
+
 import { MongoCollections } from '@customtypes/shared';
 import { RequestGenericInterface } from 'fastify/types/request';
 
-export interface AddAnswerToDatabaseRequest extends RequestGenericInterface {
-  Body: {
-    question: string;
-    answer: string;
+export interface GetTrainDataRequest extends RequestGenericInterface {
+  Querystring: {
+    size?: number;
+    page?: number;
     collection: MongoCollections;
-    guilid?: string;
+    language?: string;
   };
 }

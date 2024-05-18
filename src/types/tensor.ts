@@ -1,9 +1,5 @@
-export type TrainData = {
-  question: string;
-  answer: string;
-  language: string;
-}
-  
+import { TrainData } from "./traindata";
+
 export type NlpType = {
   addLanguage: (language: string) => void;
   addDocument: (language: string, question: string, formatted: string) => void;
