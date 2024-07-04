@@ -3,6 +3,7 @@ import { FastifyPluginAsync } from 'fastify';
 import { Error400Default, Error503Default } from '@customtypes/errors';
 import { AddAnswerToDatabaseRequest } from '@customtypes/requests/train';
 import { MongoCollections } from '@customtypes/shared';
+import { TrainData } from '@customtypes/traindata';
 
 const routes: FastifyPluginAsync = async (server) => {
   server.post<AddAnswerToDatabaseRequest>(
@@ -48,9 +49,7 @@ const routes: FastifyPluginAsync = async (server) => {
       try { 
         const language = await server.tensor.detectLanguage(request?.body?.question);
 
-        const collection = server.mongo.client.db('dark').collection(request.body.collection);
-
-        const data = request?.body?.guilid ? {
+        const data: TrainData = request?.body?.guilid ? {
           guilid: request?.body?.guilid,
           language: language,
           question: request?.body?.question,
@@ -61,7 +60,7 @@ const routes: FastifyPluginAsync = async (server) => {
           answer: request?.body?.answer,
         }
 
-        await collection.insertOne(data);
+        await server.mongoConnector.addTrainData(data, request.body.collection);
 
         return reply.code(201).send();
       } catch (error) {
