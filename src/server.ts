@@ -35,12 +35,10 @@ await server.register(cors, {
   // put your options here
 });
 
-if (server.config.MONGODB_CONNECTION) {
-  await server.register(mongodb, {
-    forceClose: true,
-    url: server.config.MONGODB_CONNECTION
-  })
-}
+await server.register(mongodb, {
+  forceClose: true,
+  url: server.config.MONGODB_CONNECTION
+});
 
 await server.register(jwt, {
   secret: server.config.JWT_SECRET,
@@ -90,6 +88,7 @@ if (server.config.NODE_ENV === NodeEnv.development) {
 
 await server.register(autoLoad, {
   dir: join(__dirname, 'routes'),
+  routeParams: true,
 });
 
 await server.register(mongoConnector);
