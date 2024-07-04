@@ -1,6 +1,7 @@
 import fastify from 'fastify';
 import config, { NodeEnv } from './plugins/config.js';
 import tensorPlugin from "./plugins/tensor.js";
+import mongoConnector from './plugins/mongoConnector.js';
 import cors from '@fastify/cors';
 import rateLimit from '@fastify/rate-limit';
 import jwt from '@fastify/jwt';
@@ -91,6 +92,7 @@ await server.register(autoLoad, {
   dir: join(__dirname, 'routes'),
 });
 
+await server.register(mongoConnector);
 await server.register(tensorPlugin);
 
 await server.ready();

@@ -49,13 +49,7 @@ const tensor: Tensor = {
 
     try {
       await Promise.all(Object.values(MongoCollections).map(async (collection) => {
-        const questionsCollection = serverInstance.mongo.client.db('dark').collection(collection);
-        const response = await questionsCollection
-          .find({}, { projection: { _id: 0, question: 1, answer: 1, language: 1 } })
-          .toArray();
-
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        //@ts-ignore
+        const response = await serverInstance.mongoConnector.getTrainData(collection);
         data = data.concat(response);
       }));
 
