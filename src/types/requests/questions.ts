@@ -11,3 +11,9 @@ export interface GetTrainDataRequest extends RequestGenericInterface {
     language?: string;
   };
 }
+
+export interface ApproveQuestionRequest extends RequestGenericInterface {
+  Params: {
+    questionid: string;
+  };
+}
