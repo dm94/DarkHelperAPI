@@ -1,14 +1,13 @@
 {
   "name": "dark-helper-api",
-  "version": "1.4.0",
+  "version": "1.5.0",
   "description": "API for the DarkHelper",
   "type": "module",
   "scripts": {
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "start": "node build",
+    "start": "tsx watch src .env | pino-pretty --colorize",
     "dev": "tsx watch src .env | pino-pretty --colorize",
-    "pretest": "npm run build",
     "test": "vitest",
     "test:watch": "vitest -w"
   },

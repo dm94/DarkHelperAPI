@@ -17,3 +17,12 @@ export interface ApproveQuestionRequest extends RequestGenericInterface {
     questionid: string;
   };
 }
+
+export interface DeleteQuestionRequest extends RequestGenericInterface {
+  Params: {
+    questionid: string;
+  };
+  Querystring: {
+    collection: MongoCollections;
+  };
+}
