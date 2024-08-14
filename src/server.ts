@@ -32,7 +32,10 @@ const server = fastify({
 await server.register(config);
 
 await server.register(cors, {
-  // put your options here
+  methods: ['POST', 'GET', 'PUT', 'OPTIONS', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true,
+  origin: [/\.deeme\.dev$/],
 });
 
 await server.register(mongodb, {
