@@ -1,7 +1,7 @@
 import { dockStart } from "@nlpjs/basic";
 import { NormalizerEs, StemmerEs, StopwordsEs } from "@nlpjs/lang-es";
 import { NormalizerEn, StemmerEn, StopwordsEn } from "@nlpjs/lang-en";
-import cld from "cld";
+import { eld } from "eld";
 import { FastifyInstance, FastifyPluginAsync } from "fastify";
 import { Tensor } from "@customtypes/tensor";
 import fp from "fastify-plugin";
@@ -101,10 +101,8 @@ const tensor: Tensor = {
   },
   detectLanguage: async (text, fallBack = "en") => {
     try {
-      const response = await cld.detect(text);
-      if (response?.languages && response?.languages.length > 0) {
-        return response.languages?.[0]?.code;
-      }
+      const response = await eld.detect(text);
+      return response?.language;
     } catch (err) {
       console.warn(err);
     }
