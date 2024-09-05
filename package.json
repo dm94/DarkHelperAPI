@@ -9,7 +9,8 @@
     "start": "tsx watch src .env | pino-pretty --colorize",
     "dev": "tsx watch src .env | pino-pretty --colorize",
     "test": "vitest",
-    "test:watch": "vitest -w"
+    "test:watch": "vitest -w",
+    "check:types": "eslint ."
   },
   "engines": {
     "node": ">=20.11.0"
