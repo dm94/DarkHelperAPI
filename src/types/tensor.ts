@@ -6,7 +6,10 @@ export type NlpType = {
   addAnswer: (language: string, formatted: string, answer: string) => void;
   train: () => Promise<void>;
   save: () => void;
-  process: (language: string, message: string) => Promise<any>;
+  // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+  process: (language: string, message: string) => Promise<any | {
+    answer: string;
+  }>;
 };
 
 export interface Tensor {

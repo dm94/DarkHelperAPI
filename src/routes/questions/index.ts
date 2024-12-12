@@ -74,9 +74,9 @@ const routes: FastifyPluginAsync = async (server) => {
         page = page - 1;
       }
 
-      const filterQuery = {};
+      const filterQuery: { language?: string } = {};
       if (request.query.language) {
-        filterQuery["language"] = request.query.language;
+        filterQuery.language = request.query.language;
       }
 
       try {
