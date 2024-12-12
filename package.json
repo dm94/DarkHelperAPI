@@ -1,6 +1,6 @@
 {
   "name": "dark-helper-api",
-  "version": "1.7.1",
+  "version": "1.7.2",
   "description": "API for the DarkHelper",
   "type": "module",
   "scripts": {
@@ -46,11 +46,8 @@
   "devDependencies": {
     "@biomejs/biome": "1.9.4",
     "@types/node": "^22.10.1",
-    "@typescript-eslint/eslint-plugin": "^5.62.0",
-    "@typescript-eslint/parser": "^5.62.0",
     "esbuild": "^0.23.1",
     "pino-pretty": "^13.0.0",
-    "prettier": "^3.3.3",
     "tsx": "^4.11.2",
     "typescript": "^5.4.5",
     "vitest": "^2.1.8"
