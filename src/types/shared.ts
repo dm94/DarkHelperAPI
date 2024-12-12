@@ -16,5 +16,5 @@ export const validLanguages = [
 export enum MongoCollections {
   QUESTIONS_EXTRA = "extraquestions",
   QUESTIONS = "questions",
-  TRAINED = "trained"
+  TRAINED = "trained",
 }

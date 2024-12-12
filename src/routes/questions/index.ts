@@ -1,44 +1,43 @@
-import { Type } from '@sinclair/typebox';
-import { FastifyPluginAsync } from 'fastify';
-import { Error400Default, Error503Default } from '@customtypes/errors';
-import { GetTrainDataRequest } from '@customtypes/requests/questions';
-import { MongoCollections, validLanguages } from '@customtypes/shared';
-import { TrainData, TranDataSchema } from '@customtypes/traindata';
+import { Type } from "@sinclair/typebox";
+import type { FastifyPluginAsync } from "fastify";
+import { Error400Default, Error503Default } from "@customtypes/errors";
+import type { GetTrainDataRequest } from "@customtypes/requests/questions";
+import { MongoCollections, validLanguages } from "@customtypes/shared";
+import { type TrainData, TranDataSchema } from "@customtypes/traindata";
 
 const routes: FastifyPluginAsync = async (server) => {
-  server.get<GetTrainDataRequest,  { Reply: TrainData[] }>(
-    '/',
+  server.get<GetTrainDataRequest, { Reply: TrainData[] }>(
+    "/",
     {
       onRequest: [server.botAuth],
       schema: {
-        description:
-          'Returns the list of training information',
-        summary: 'getTrainData',
-        operationId: 'getTrainData',
-        tags: ['web'],
+        description: "Returns the list of training information",
+        summary: "getTrainData",
+        operationId: "getTrainData",
+        tags: ["web"],
         querystring: {
-          type: 'object',
-          required: ['collection'],
+          type: "object",
+          required: ["collection"],
           properties: {
             size: {
-              type: 'integer',
+              type: "integer",
               default: 10,
               minimum: 1,
               maximum: 100,
             },
             page: {
-              type: 'integer',
+              type: "integer",
               default: 1,
               minimum: 1,
             },
             collection: {
-              type: 'string',
-              description: 'Collection',
+              type: "string",
+              description: "Collection",
               enum: Object.values(MongoCollections),
             },
             language: {
-              type: 'string',
-              description: 'To filter by language',
+              type: "string",
+              description: "To filter by language",
               enum: validLanguages,
             },
           },
@@ -80,12 +79,16 @@ const routes: FastifyPluginAsync = async (server) => {
         filterQuery["language"] = request.query.language;
       }
 
-      try { 
-        const questionsCollection = server.mongo.client.db('dark').collection(request.query.collection);
+      try {
+        const questionsCollection = server.mongo.client
+          .db("dark")
+          .collection(request.query.collection);
 
         const data = await questionsCollection
-        .find(filterQuery, { projection: { _id: 1, question: 1, answer: 1, language: 1 } }).skip(page * limit).limit(limit)
-        .toArray();
+          .find(filterQuery, { projection: { _id: 1, question: 1, answer: 1, language: 1 } })
+          .skip(page * limit)
+          .limit(limit)
+          .toArray();
 
         const response: TrainData[] = data.map((item) => {
           return {
@@ -93,14 +96,14 @@ const routes: FastifyPluginAsync = async (server) => {
             question: item.question,
             answer: item.answer,
             language: item.language ?? "en",
-          }
+          };
         });
 
         return reply.code(200).send(response);
       } catch (error) {
         console.error(error);
         return reply.code(503).send({
-          message: "Error: Internal error"
+          message: "Error: Internal error",
         });
       }
     },

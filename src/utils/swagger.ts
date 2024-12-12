@@ -1,4 +1,4 @@
-import { version, description, author, homepage, bugs, name } from '../../package.json';
+import { version, description, author, homepage, bugs, name } from "../../package.json";
 
 export const schema = {
   openapi: {
@@ -14,22 +14,22 @@ export const schema = {
     externalDocs: {
       url: homepage,
     },
-    consumes: ['application/json'],
-    produces: ['application/json'],
+    consumes: ["application/json"],
+    produces: ["application/json"],
     tags: [
-      { name: 'bot', description: 'Discord bot related end-points' },
-      { name: 'web', description: 'Web related end-points' },
+      { name: "bot", description: "Discord bot related end-points" },
+      { name: "web", description: "Web related end-points" },
     ],
     components: {
       securitySchemes: {
         apiKey: {
-          type: 'apiKey',
-          name: 'apiKey',
-          in: 'header',
+          type: "apiKey",
+          name: "apiKey",
+          in: "header",
         },
         token: {
-          type: 'http',
-          scheme: 'bearer',
+          type: "http",
+          scheme: "bearer",
         },
       },
     },

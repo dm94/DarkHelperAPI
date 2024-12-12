@@ -1,23 +1,23 @@
-import { Type } from '@sinclair/typebox';
-import { FastifyPluginAsync } from 'fastify';
-import { Error400Default, Error404Default, Error503Default } from '@customtypes/errors';
-import { ApproveQuestionRequest, DeleteQuestionRequest } from '@customtypes/requests/questions';
-import { MongoCollections } from '@customtypes/shared';
+import { Type } from "@sinclair/typebox";
+import type { FastifyPluginAsync } from "fastify";
+import { Error400Default, Error404Default, Error503Default } from "@customtypes/errors";
+import type { ApproveQuestionRequest, DeleteQuestionRequest } from "@customtypes/requests/questions";
+import { MongoCollections } from "@customtypes/shared";
 
 const routes: FastifyPluginAsync = async (server) => {
   server.post<ApproveQuestionRequest>(
-    '/',
+    "/",
     {
       onRequest: [server.botAuth],
       schema: {
-        description: 'Approve a question',
-        summary: 'approveQuestion',
-        operationId: 'approveQuestion',
-        tags: ['web'],
+        description: "Approve a question",
+        summary: "approveQuestion",
+        operationId: "approveQuestion",
+        tags: ["web"],
         params: {
-          type: 'object',
+          type: "object",
           properties: {
-            questionid: { type: 'string' },
+            questionid: { type: "string" },
           },
         },
         security: [
@@ -39,45 +39,51 @@ const routes: FastifyPluginAsync = async (server) => {
       }
 
       try {
-        const data = await server.mongoConnector.getTrainDataById(request.params.questionid, MongoCollections.QUESTIONS_EXTRA);
+        const data = await server.mongoConnector.getTrainDataById(
+          request.params.questionid,
+          MongoCollections.QUESTIONS_EXTRA,
+        );
         if (!data) {
           return reply.code(404).send();
         }
 
         await server.mongoConnector.addTrainData(data, MongoCollections.QUESTIONS);
-          await server.mongoConnector.deleteEntryById(request.params.questionid, MongoCollections.QUESTIONS_EXTRA);
+        await server.mongoConnector.deleteEntryById(
+          request.params.questionid,
+          MongoCollections.QUESTIONS_EXTRA,
+        );
 
         return reply.code(200).send();
-      } catch(error) {
+      } catch (error) {
         console.error(error);
         return reply.code(503).send({
-          message: "Error: Internal error"
+          message: "Error: Internal error",
         });
       }
     },
   );
   server.delete<DeleteQuestionRequest>(
-    '/',
+    "/",
     {
       onRequest: [server.botAuth],
       schema: {
-        description: 'Delete a question',
-        summary: 'deleteQuestion',
-        operationId: 'deleteQuestion',
-        tags: ['web'],
+        description: "Delete a question",
+        summary: "deleteQuestion",
+        operationId: "deleteQuestion",
+        tags: ["web"],
         params: {
-          type: 'object',
+          type: "object",
           properties: {
-            questionid: { type: 'string' },
+            questionid: { type: "string" },
           },
         },
         querystring: {
-          type: 'object',
-          required: ['collection'],
+          type: "object",
+          required: ["collection"],
           properties: {
             collection: {
-              type: 'string',
-              description: 'Collection',
+              type: "string",
+              description: "Collection",
               enum: Object.values(MongoCollections),
             },
           },
@@ -96,17 +102,20 @@ const routes: FastifyPluginAsync = async (server) => {
       },
     },
     async (request, reply) => {
-      if (!request?.params.questionid ||!request?.query?.collection) {
+      if (!request?.params.questionid || !request?.query?.collection) {
         return reply.code(400).send();
       }
 
       try {
-        await server.mongoConnector.deleteEntryById(request.params.questionid, request?.query?.collection);
+        await server.mongoConnector.deleteEntryById(
+          request.params.questionid,
+          request?.query?.collection,
+        );
         return reply.code(204).send();
-      } catch(error) {
+      } catch (error) {
         console.error(error);
         return reply.code(503).send({
-          message: "Error: Internal error"
+          message: "Error: Internal error",
         });
       }
     },

@@ -1,4 +1,4 @@
-import { TrainData } from "./traindata";
+import type { TrainData } from "./traindata";
 
 export type NlpType = {
   addLanguage: (language: string) => void;
@@ -7,8 +7,8 @@ export type NlpType = {
   train: () => Promise<void>;
   save: () => void;
   process: (language: string, message: string) => Promise<any>;
-}
-  
+};
+
 export interface Tensor {
   nlp?: NlpType;
   init: () => Promise<void>;

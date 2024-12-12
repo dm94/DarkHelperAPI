@@ -2,11 +2,11 @@ import { dockStart } from "@nlpjs/basic";
 import { NormalizerEs, StemmerEs, StopwordsEs } from "@nlpjs/lang-es";
 import { NormalizerEn, StemmerEn, StopwordsEn } from "@nlpjs/lang-en";
 import { eld } from "eld";
-import { FastifyInstance, FastifyPluginAsync } from "fastify";
-import { Tensor } from "@customtypes/tensor";
+import type { FastifyInstance, FastifyPluginAsync } from "fastify";
+import type { Tensor } from "@customtypes/tensor";
 import fp from "fastify-plugin";
 import { MongoCollections, validLanguages } from "@customtypes/shared";
-import { TrainData } from "@customtypes/traindata";
+import type { TrainData } from "@customtypes/traindata";
 
 const normalizerEs = new NormalizerEs();
 const normalizerEn = new NormalizerEn();
@@ -48,12 +48,16 @@ const tensor: Tensor = {
     let data: TrainData[] = [];
 
     try {
-      await Promise.all(Object.values(MongoCollections).map(async (collection) => {
-        const response = await serverInstance.mongoConnector.getTrainData(collection);
-        data = data.concat(response);
-      }));
+      await Promise.all(
+        Object.values(MongoCollections).map(async (collection) => {
+          const response = await serverInstance.mongoConnector.getTrainData(collection);
+          data = data.concat(response);
+        }),
+      );
 
-      console.info(`${new Date().toLocaleTimeString()} | ${data.length} Questions/Answers loaded from DB`);
+      console.info(
+        `${new Date().toLocaleTimeString()} | ${data.length} Questions/Answers loaded from DB`,
+      );
     } catch (error) {
       console.log(error);
     }
@@ -68,18 +72,18 @@ const tensor: Tensor = {
     console.info(new Date().toLocaleTimeString(), "AI Logic: Model loading");
 
     try {
-      trainingData.forEach((data) => {
+      for (const data of trainingData) {
         if (!data.question || !data.answer) {
           return;
         }
-  
+
         if (!validLanguages.includes(data.language)) {
           return;
         }
-  
+
         const language = data.language ?? "es";
         let formatted = data.answer;
-  
+
         if (language === "es") {
           const tokens = stemmerEs.tokenizeAndStem(data.question, false);
           formatted = tokens.join(".").toLowerCase();
@@ -87,10 +91,10 @@ const tensor: Tensor = {
           const tokens = stemmerEn.tokenizeAndStem(data.question, false);
           formatted = tokens.join(".").toLowerCase();
         }
-  
+
         tensor.nlp?.addDocument(language, data.question, formatted);
         tensor.nlp?.addAnswer(language, formatted, data.answer);
-      });
+      }
       await tensor.nlp?.train();
       tensor.nlp?.save();
     } catch (error) {
@@ -113,18 +117,19 @@ const tensor: Tensor = {
     if (!tensor?.nlp) {
       return;
     }
+    let newMessage = message;
 
     if (language === "es") {
-      message = normalizerEs.normalize(message);
+      newMessage = normalizerEs.normalize(newMessage);
     } else if (language === "en") {
-      message = normalizerEn.normalize(message);
+      newMessage = normalizerEn.normalize(newMessage);
     }
 
-    const response = await tensor.nlp?.process(language, message);
+    const response = await tensor.nlp?.process(language, newMessage);
     if (response?.answer) {
       return response.answer;
     }
-  
+
     return null;
   },
   answerTheQuestion: async (question: string) => {
@@ -132,8 +137,8 @@ const tensor: Tensor = {
     const response = await tensor.getAnAnswer(question, language);
 
     return response ?? "No answer";
-  }
-}
+  },
+};
 
 const tensorPlugin: FastifyPluginAsync = async (server) => {
   serverInstance = server;
@@ -141,7 +146,7 @@ const tensorPlugin: FastifyPluginAsync = async (server) => {
   server.decorate("tensor", tensor);
 };
 
-declare module 'fastify' {
+declare module "fastify" {
   export interface FastifyInstance {
     tensor: Tensor;
   }

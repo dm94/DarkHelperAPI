@@ -1,24 +1,23 @@
-import { Type } from '@sinclair/typebox';
-import { FastifyPluginAsync } from 'fastify';
-import { Error400Default, Error503Default } from '@customtypes/errors';
-import { AnswerQuestionRequest } from '@customtypes/requests/ask';
+import { Type } from "@sinclair/typebox";
+import type { FastifyPluginAsync } from "fastify";
+import { Error400Default, Error503Default } from "@customtypes/errors";
+import type { AnswerQuestionRequest } from "@customtypes/requests/ask";
 
 const routes: FastifyPluginAsync = async (server) => {
   server.get<AnswerQuestionRequest>(
-    '/',
+    "/",
     {
       onRequest: [server.botAuth],
       schema: {
-        description:
-          'Receives a question that the AI answers',
-        summary: 'answerQuestion',
-        operationId: 'answerQuestion',
-        tags: ['bot'],
+        description: "Receives a question that the AI answers",
+        summary: "answerQuestion",
+        operationId: "answerQuestion",
+        tags: ["bot"],
         querystring: {
-          type: 'object',
-          required: ['question'],
+          type: "object",
+          required: ["question"],
           properties: {
-            question: { type: 'string' },
+            question: { type: "string" },
           },
         },
         security: [
@@ -40,7 +39,7 @@ const routes: FastifyPluginAsync = async (server) => {
         return reply.code(400).send();
       }
 
-      try { 
+      try {
         const response = await server.tensor.answerTheQuestion(request.query.question);
 
         return reply.code(200).send({
@@ -49,7 +48,7 @@ const routes: FastifyPluginAsync = async (server) => {
       } catch (error) {
         console.error(error);
         return reply.code(503).send({
-          message: "Error: Internal error"
+          message: "Error: Internal error",
         });
       }
     },

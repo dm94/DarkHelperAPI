@@ -1,7 +1,7 @@
 import "dotenv/config";
 import fp from "fastify-plugin";
-import { FastifyPluginAsync } from "fastify";
-import { Static, Type } from "@sinclair/typebox";
+import type { FastifyPluginAsync } from "fastify";
+import { type Static, Type } from "@sinclair/typebox";
 import Ajv from "ajv";
 
 export enum NodeEnv {
@@ -19,18 +19,16 @@ export enum LogLevel {
   fatal = "fatal",
 }
 
-const ConfigSchema = Type.Strict(
-  Type.Object({
-    NODE_ENV: Type.Enum(NodeEnv),
-    LOG_LEVEL: Type.Enum(LogLevel),
-    API_HOST: Type.String(),
-    API_PORT: Type.String(),
-    JWT_SECRET: Type.String(),
-    API_KEY: Type.String(),
-    MONGODB_CONNECTION: Type.String(),
-    MONGODB_DATABASE: Type.String(),
-  })
-);
+const ConfigSchema = Type.Object({
+  NODE_ENV: Type.Enum(NodeEnv),
+  LOG_LEVEL: Type.Enum(LogLevel),
+  API_HOST: Type.String(),
+  API_PORT: Type.String(),
+  JWT_SECRET: Type.String(),
+  API_KEY: Type.String(),
+  MONGODB_CONNECTION: Type.String(),
+  MONGODB_DATABASE: Type.String(),
+});
 
 const ajv = new Ajv({
   allErrors: true,
@@ -46,10 +44,7 @@ const configPlugin: FastifyPluginAsync = async (server) => {
   const validate = ajv.compile(ConfigSchema);
   const valid = validate(process.env);
   if (!valid) {
-    throw new Error(
-      ".env file validation failed - " +
-        JSON.stringify(validate.errors, null, 2)
-    );
+    throw new Error(`.env file validation failed - ${JSON.stringify(validate.errors, null, 2)}`);
   }
   server.decorate("config", process.env);
 };

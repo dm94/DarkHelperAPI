@@ -1,4 +1,4 @@
-import { Static, Type } from '@sinclair/typebox';
+import { type Static, Type } from "@sinclair/typebox";
 
 export const TranDataSchema = Type.Object({
   id: Type.Optional(Type.String()),
