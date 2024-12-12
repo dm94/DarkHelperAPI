@@ -10,8 +10,8 @@ import swagger from "@fastify/swagger";
 import swaggerUi from "@fastify/swagger-ui";
 import mongodb from "@fastify/mongodb";
 import { schema } from "./utils/swagger";
-import { fileURLToPath } from "url";
-import { dirname, join } from "path";
+import { fileURLToPath } from "node:url";
+import { dirname, join } from "node:path";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -77,7 +77,7 @@ server.setNotFoundHandler(
       timeWindow: 500,
     }),
   },
-  (request, reply) => {
+  (_request, reply) => {
     reply.code(404).send({ error: "404" });
   },
 );

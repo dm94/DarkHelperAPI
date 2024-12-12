@@ -9,10 +9,10 @@ import type {
 declare module "fastify" {
   export interface FastifyInstance<
     RawServer extends RawServerBase = RawServerDefault,
-    RawRequest extends
+    _RawRequest extends
       RawRequestDefaultExpression<RawServer> = RawRequestDefaultExpression<RawServer>,
-    RawReply extends RawReplyDefaultExpression<RawServer> = RawReplyDefaultExpression<RawServer>,
-    Logger = FastifyLoggerInstance,
+    _RawReply extends RawReplyDefaultExpression<RawServer> = RawReplyDefaultExpression<RawServer>,
+    _Logger = FastifyLoggerInstance,
   > {
     authenticate(): void;
     botAuth(): void;
