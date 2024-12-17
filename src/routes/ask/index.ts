@@ -41,6 +41,9 @@ const routes: FastifyPluginAsync = async (server) => {
 
       try {
         const response = await server.tensor.answerTheQuestion(request.query.question);
+        if (!response) {
+          return reply.code(400).send();
+        }
 
         return reply.code(200).send({
           reply: response,

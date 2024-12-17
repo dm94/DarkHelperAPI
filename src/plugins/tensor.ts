@@ -136,7 +136,7 @@ const tensor: Tensor = {
     const language = await tensor.detectLanguage(question);
     const response = await tensor.getAnAnswer(question, language);
 
-    return response ?? "No answer";
+    return response ?? undefined;
   },
 };
 
