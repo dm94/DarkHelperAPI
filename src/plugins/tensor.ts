@@ -32,6 +32,9 @@ const tensor: Tensor = {
     });
     tensor.nlp = dock.get("nlp");
     if (!tensor.nlp) {
+      console.error(
+        `${new Date().toLocaleTimeString()} | NLP cannot be initialised`,
+      );
       return;
     }
 
@@ -74,39 +77,44 @@ const tensor: Tensor = {
     try {
       for (const data of trainingData) {
         if (!data.question || !data.answer) {
-          return;
+          continue;
         }
 
-        if (!validLanguages.includes(data.language)) {
-          return;
+        const language = data.language ?? tensor.detectLanguage(data.answer);
+
+        if (!validLanguages.includes(language)) {
+          continue;
         }
 
-        const language = data.language ?? "es";
         let formatted = data.answer;
 
         if (language === "es") {
           const tokens = stemmerEs.tokenizeAndStem(data.question, false);
-          formatted = tokens.join(".").toLowerCase();
+          if (tokens && tokens.length > 0) {
+            formatted = tokens.join(".").toLowerCase().trim();
+          }
         } else if (language === "en") {
           const tokens = stemmerEn.tokenizeAndStem(data.question, false);
-          formatted = tokens.join(".").toLowerCase();
+          if (tokens && tokens.length > 0) {
+            formatted = tokens.join(".").toLowerCase().trim();
+          }
         }
 
-        tensor.nlp?.addDocument(language, data.question, formatted);
-        tensor.nlp?.addAnswer(language, formatted, data.answer);
+        tensor.nlp.addDocument(language, data.question, formatted);
+        tensor.nlp.addAnswer(language, formatted, data.answer);
       }
-      await tensor.nlp?.train();
-      tensor.nlp?.save();
+      await tensor.nlp.train();
     } catch (error) {
       console.log(error);
     }
 
+    tensor.nlp.save();
     console.info(new Date().toLocaleTimeString(), "AI Logic: Model loaded");
   },
   detectLanguage: async (text, fallBack = "en") => {
     try {
       const response = await eld.detect(text);
-      return response?.language;
+      return response?.language.toLowerCase().trim();
     } catch (err) {
       console.warn(err);
     }
@@ -125,12 +133,12 @@ const tensor: Tensor = {
       newMessage = normalizerEn.normalize(newMessage);
     }
 
-    const response = await tensor.nlp?.process(language, newMessage);
+    const response = await tensor.nlp.process(language, newMessage);
     if (response?.answer) {
       return response.answer;
     }
 
-    return null;
+    return undefined;
   },
   answerTheQuestion: async (question: string) => {
     const language = await tensor.detectLanguage(question);

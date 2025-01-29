@@ -1,6 +1,6 @@
 {
   "name": "dark-helper-api",
-  "version": "1.7.3",
+  "version": "1.7.4",
   "description": "API for the DarkHelper",
   "type": "module",
   "scripts": {
