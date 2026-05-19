@@ -33,7 +33,7 @@ await server.register(config);
 
 await server.register(cors, {
   methods: ["POST", "GET", "PUT", "OPTIONS", "DELETE"],
-  allowedHeaders: ["Content-Type", "Authorization"],
+  allowedHeaders: ["Content-Type", "Authorization", "apiKey"],
   credentials: true,
   origin: [/\.deeme\.dev$/],
 });
